@@ -1,10 +1,28 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Aug 11 15:14:28 2020
-
-@author: julie
+@author: julien collos, hicham sekkat, theo dolphin
 """
+import networkx as nx
+import osmnx as ox
+import requests
+import matplotlib.cm as cm
+import numpy as np
+import matplotlib.pyplot as plt
+from networkx import *
+from math import inf
+ox.config(use_cache=True, log_console=True)
+ox.__version__
 
+G=nx.Graph()
+name_nodes = {1:"1", 2:"2", 3:"3", 4:"4", 5:"5", 6:"6", 7:"7"}
+list_edges = [(1,2),(2,3),(3,4),(4,5),(5,7),(2,4),(2,6),(6,5)]
+lines = ["1 2 2", "2 3 4" ,"3 4 5","4 5 4","5 7 7","2 4 3","2 6 6","6 5 8"]
+H=nx.relabel_nodes(G,name_nodes)
+H.add_nodes_from([1,2,3,4,5,6,7])
+H.add_edges_from(list_edges)
+
+
+'''renvoie une liste des noeuds qui sont de degrees impairs'''
 def odd_vertices(n, edges):
     L = [0] * n
     res = []
@@ -16,6 +34,12 @@ def odd_vertices(n, edges):
             res.append(i)
     return res
 
+'''creer des edges entre les noeuds impairs'''
+def create_edges_odd_impair(list_odd_nodes):
+    l = list_edges.copy()
+    l.append((1,7))
+    return l
+        
 def parcours(i, vect, adj, n):
     vect[i] = True
     for j in range(n):
@@ -94,3 +118,17 @@ def is_eulerian_cycle(m, edges, cycle):
     if (len(edges) == 0):
         return True
     return False
+
+###############################################################
+#                             MAIN                            #
+###############################################################
+
+def principale(n,edges):
+    is_edge_connected(n,edges)
+    odd_nodes = odd_vertices(n,edges)
+    o = create_edges_odd_impair(odd_nodes)
+    ll = odd_vertices(n,o)
+    return ll
+
+print(principale(8,list_edges))
+    
