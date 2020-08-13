@@ -130,7 +130,8 @@ def principale(n,edges):
     is_edge_connected(n,edges)
     odd_nodes = odd_vertices(n,edges)
     o = create_edges_odd_impair(odd_nodes)
-    return o
+    ll = odd_vertices(n,o)
+    return ll
 
 print(principale(8,list_edges))
     
