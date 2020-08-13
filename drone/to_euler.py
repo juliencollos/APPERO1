@@ -37,7 +37,10 @@ def odd_vertices(n, edges):
 '''creer des edges entre les noeuds impairs'''
 def create_edges_odd_impair(list_odd_nodes):
     l = list_edges.copy()
-    l.append((1,7))
+    for i in range(0,len(l) - 1,2):
+        if i > len(list_odd_nodes) - 1 or i + 1 > len(list_odd_nodes) - 1:
+            return l
+        l.append((list_odd_nodes[i], list_odd_nodes[i + 1]))
     return l
         
 def parcours(i, vect, adj, n):
@@ -127,8 +130,7 @@ def principale(n,edges):
     is_edge_connected(n,edges)
     odd_nodes = odd_vertices(n,edges)
     o = create_edges_odd_impair(odd_nodes)
-    ll = odd_vertices(n,o)
-    return ll
+    return o
 
 print(principale(8,list_edges))
     
