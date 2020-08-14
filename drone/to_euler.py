@@ -15,12 +15,13 @@ ox.__version__
 
 G=nx.Graph()
 name_nodes = {1:"1", 2:"2", 3:"3", 4:"4", 5:"5", 6:"6", 7:"7"}
-list_edges = [(1,2),(2,3),(3,4),(4,5),(5,7),(2,4),(2,6),(6,5)]
+list_edges = [(1,2,1),(2,3,2),(3,4,3),(4,5,4),(5,7,5),(2,4,6),(2,6,7),(6,5,8)]
 list_final_edges = []
 lines = ["1 2 2", "2 3 4" ,"3 4 5","4 5 4","5 7 7","2 4 3","2 6 6","6 5 8"]
 H=nx.relabel_nodes(G,name_nodes)
 H.add_nodes_from([1,2,3,4,5,6,7])
-H.add_edges_from(list_edges)
+H.add_weighted_edges_from(list_edges)
+list_edges_sans_poids = []
 
 
 '''renvoie une liste des noeuds qui sont de degrees impairs'''
@@ -36,8 +37,8 @@ def odd_vertices(n, edges):
     return res
 
 '''creer des edges entre les noeuds impairs'''
-def create_edges_odd_impair(list_odd_nodes):
-    l = list_edges.copy()
+def create_edges_odd_impair(list_odd_nodes,tmp):
+    l = tmp.copy()
     for i in range(0,len(l) - 1,2):
         if i > len(list_odd_nodes) - 1 or i + 1 > len(list_odd_nodes) - 1:
             return l
@@ -123,24 +124,6 @@ def is_eulerian_cycle(m, edges, cycle):
     if (len(edges) == 0):
         return True
     return False
-'''methode de : Hierholzer algorithm'''
-def printCircuit(list_edges): 
-    if len(list_edges) == 0: 
-        return
-    curr_path = [0] 
-    circuit = [] 
-   
-    while curr_path: 
-        curr_v = curr_path[-1] 
-        if list_edges[curr_v]: 
-            next_v = list_edges[curr_v].pop() 
-            curr_path.append(next_v) 
-        else: 
-            circuit.append(curr_path.pop()) 
-    for i in range(len(circuit) - 1, -1, -1): 
-        print(circuit[i], end = "") 
-        if i: 
-            print(" -> ", end = "")
 
 '''convert tuple en list, on en a besoin pour notre list de edges'''           
 def convert_tuple_to_list(tuple): 
@@ -151,6 +134,10 @@ def convert_edge_list(list_edges):
         list_final_edges.append(convert_tuple_to_list(list_edges[i]))
     return list_final_edges
 
+def recupere_edges_sans_poids(list_edges):
+    for i in range(len(list_edges)):
+        list_edges_sans_poids.append((list_edges[i][0],list_edges[i][1]))
+    return list_edges_sans_poids
 ###############################################################
 #                             MAIN                            #
 ###############################################################
@@ -158,9 +145,10 @@ def convert_edge_list(list_edges):
 if __name__ == "__main__":
     n = 8
     edges = list_edges
-    is_edge_connected(n,edges)
-    odd_nodes = odd_vertices(n,edges)
-    new_list_edges = create_edges_odd_impair(odd_nodes)
+    tmp = recupere_edges_sans_poids(edges)
+    odd_nodes = odd_vertices(n,list_edges_sans_poids)
+    new_list_edges = create_edges_odd_impair(odd_nodes,tmp)
     final = convert_edge_list(new_list_edges)
-    printCircuit(final)
+    print(final)
+
 
