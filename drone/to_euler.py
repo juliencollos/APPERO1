@@ -16,6 +16,7 @@ ox.__version__
 G=nx.Graph()
 name_nodes = {1:"1", 2:"2", 3:"3", 4:"4", 5:"5", 6:"6", 7:"7"}
 list_edges = [(1,2),(2,3),(3,4),(4,5),(5,7),(2,4),(2,6),(6,5)]
+list_final_edges = []
 lines = ["1 2 2", "2 3 4" ,"3 4 5","4 5 4","5 7 7","2 4 3","2 6 6","6 5 8"]
 H=nx.relabel_nodes(G,name_nodes)
 H.add_nodes_from([1,2,3,4,5,6,7])
@@ -72,6 +73,7 @@ def is_connected(n, edges):
             return False
     return True
 
+'''verifie si tous les edges sont bien connectes entre eux'''
 def is_edge_connected(n, edges):
     if n == 0 or len(edges) == 0:
         return True
@@ -94,10 +96,10 @@ def is_edge_connected(n, edges):
         if succ[a] and not tmp[a]:
             return False
     return True
-
+'''regarde si le graph est eulerien'''
 def is_eulerian(n, edges):
     return is_edge_connected(n, edges) and not odd_vertices(n, edges)
-
+'''on regarde si on trouve un graphe eulerien'''
 def is_eulerian_cycle(m, edges, cycle):
     if (len(edges) == 0 and len(cycle) == 0):
         return True
@@ -121,17 +123,44 @@ def is_eulerian_cycle(m, edges, cycle):
     if (len(edges) == 0):
         return True
     return False
+'''methode de : Hierholzer algorithm'''
+def printCircuit(list_edges): 
+    if len(list_edges) == 0: 
+        return
+    curr_path = [0] 
+    circuit = [] 
+   
+    while curr_path: 
+        curr_v = curr_path[-1] 
+        if list_edges[curr_v]: 
+            next_v = list_edges[curr_v].pop() 
+            curr_path.append(next_v) 
+        else: 
+            circuit.append(curr_path.pop()) 
+    for i in range(len(circuit) - 1, -1, -1): 
+        print(circuit[i], end = "") 
+        if i: 
+            print(" -> ", end = "")
+
+'''convert tuple en list, on en a besoin pour notre list de edges'''           
+def convert_tuple_to_list(tuple): 
+    return list(tuple)
+'''convertis notre tupele de edge en list pour pouvoir aplliquer Hierholzer algorithm'''
+def convert_edge_list(list_edges):
+    for i in range(len(list_edges)):
+        list_final_edges.append(convert_tuple_to_list(list_edges[i]))
+    return list_final_edges
 
 ###############################################################
 #                             MAIN                            #
 ###############################################################
-
-def principale(n,edges):
+    
+if __name__ == "__main__":
+    n = 8
+    edges = list_edges
     is_edge_connected(n,edges)
     odd_nodes = odd_vertices(n,edges)
-    o = create_edges_odd_impair(odd_nodes)
-    ll = odd_vertices(n,o)
-    return ll
+    new_list_edges = create_edges_odd_impair(odd_nodes)
+    final = convert_edge_list(new_list_edges)
+    printCircuit(final)
 
-print(principale(8,list_edges))
-    
