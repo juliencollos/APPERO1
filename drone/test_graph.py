@@ -4,7 +4,12 @@ Created on Sun Jun  7 11:04:45 2020
 
 @author: julie
 """
-
+if pair[1] == a:
+            list_pair_edge.remove(pair)
+        if pair[0] == b:
+            list_pair_edge.remove(pair)
+        if pair[1] == b:
+            list_pair_edge.remove(pair)
 
 import networkx as nx
 import osmnx as ox
@@ -19,7 +24,7 @@ ox.__version__
 
 G=nx.Graph()
 name_nodes = {1:"1", 2:"2", 3:"3", 4:"4", 5:"5", 6:"6", 7:"7"}
-list_edges = [(1,2),(2,3),(3,4),(4,5),(5,7),(2,4),(2,6),(6,5),(1,4),(5,7)]
+list_edges = [(1,2),(2,3),(3,4),(4,5),(5,7),(2,4),(2,6),(6,5),(1,4)]
 lines = ["1 2 2", "2 3 4" ,"3 4 5","4 5 4","5 7 7","2 4 3","2 6 6","6 5 8"]
 H=nx.relabel_nodes(G,name_nodes)
 H.add_nodes_from([1,2,3,4,5,6,7])
