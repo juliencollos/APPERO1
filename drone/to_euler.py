@@ -65,7 +65,7 @@ def choice_best_new_pair(list_pair_edge,list_odd_nodes):
     for i in range(len(list_pair_edge)):
         if nx.dijkstra_path(H,list_pair_edge[i][0],list_pair_edge[i][1]) <= min:
             min = nx.dijkstra_path(H,list_pair_edge[i][0],list_pair_edge[i][1])
-    pair_return.append([min[0],min[-1]])
+    pair_return.append([min[0],min[-1],min])#donne en poids le chemin de Dijsktra
     list_odd_nodes.remove(min[0])
     list_odd_nodes.remove(min[-1])
     if len(list_odd_nodes) != 0:
