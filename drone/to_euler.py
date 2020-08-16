@@ -160,12 +160,20 @@ def is_eulerian_cycle(m, edges, cycle):
 def convert_tuple_to_list(tuple): 
     return list(tuple)
 
+def convert_list_to_tuple(list): 
+    return tuple(list)
+
 '''convertis notre tupele de edge en list pour pouvoir aplliquer Hierholzer algorithm'''
 def convert_edge_list(list_edges):
     for i in range(len(list_edges)):
         list_final_edges.append(convert_tuple_to_list(list_edges[i]))
     return list_final_edges
 
+L = []
+def convert_edge_tuple(tuples):
+    for i in range(len(tuples)):
+        L.append(convert_list_to_tuple(tuples[i]))
+    return L
 '''recupere juste le couple'''
 def recupere_edges_sans_poids(list_edges):
     for i in range(len(list_edges)):
@@ -177,6 +185,7 @@ def recupere_edges_sans_poids(list_edges):
 #                             MAIN                            #
 ###############################################################
     
+
 if __name__ == "__main__":
     n = 8
     edges = list_edges
@@ -184,6 +193,7 @@ if __name__ == "__main__":
     tmp1 = convert_edge_list(tmp)
     odd_nodes = odd_vertices(n,edges)
     olala = generate_pair_possible(odd_nodes)
-    new_list_edges = choice_best_new_pair(olala,odd_nodes)
-    result = new_list_edges + tmp1
-    print(new_list_edges)
+    best_pair_list = choice_best_new_pair(olala,odd_nodes)
+    best_pair_tuple = convert_edge_tuple(best_pair_list)
+    result = edges + best_pair_tuple
+    print(result)
