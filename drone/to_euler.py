@@ -198,6 +198,9 @@ if __name__ == "__main__":
     best_pair_list = choice_best_new_pair(olala,odd_nodes)
     best_pair_tuple = convert_edge_tuple(best_pair_list)
     result = edges + best_pair_tuple
-    H.add_edges_from(result)
     print(nx.is_eulerian(H))
+    print(H.edges())
+    h = nx.eulerize(H)
+    print(nx.is_eulerian(h))
+    print(h.edges())
     print(result)
