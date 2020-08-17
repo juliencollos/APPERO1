@@ -191,9 +191,6 @@ def recupere_edges_sans_poids(list_edges):
 if __name__ == "__main__":
     n = 8
     edges = list_edges
-    a = nx.degree(H)
-    if a[1] % 2 != 0:
-        print(a[2])
     tmp = recupere_edges_sans_poids(edges)
     tmp1 = convert_edge_list(tmp)
     odd_nodes = odd_vertices(n,edges)
@@ -201,4 +198,6 @@ if __name__ == "__main__":
     best_pair_list = choice_best_new_pair(olala,odd_nodes)
     best_pair_tuple = convert_edge_tuple(best_pair_list)
     result = edges + best_pair_tuple
-    #print(result)
+    H.add_edges_from(result)
+    print(nx.is_eulerian(H))
+    print(result)

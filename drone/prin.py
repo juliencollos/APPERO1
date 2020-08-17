@@ -17,14 +17,14 @@ ox.config(use_cache=True, log_console=True)
 ox.__version__
 
 ###############################################################
-#                             VARS                            #
+#                          VARIABLES                          #
 ###############################################################
 
 list_odd_node = []
 list_edge = []
 list_pair_edge = []
 pair_return = []
-
+eulerian_circuit = []
 
 ###############################################################
 #                             GRAPH                           #
@@ -33,13 +33,13 @@ pair_return = []
 def display_part_of_graph(around):
     return ox.graph_from_address("14411 Pierrefonds Blvd, Pierrefonds, Quebec H9H 1Z2, Canada",dist = around, network_type="drive_service")
    
-def set_undirected(around):
+def set_undirected():
     number_node = graph.number_of_nodes()
     edges = [(u,v,w['length']) for u,v,w in graph.edges(data = True)]
     return edges, number_node
 
 ###################################################### 
-graph = ox.get_undirected(display_part_of_graph(500))#
+graph = ox.get_undirected(display_part_of_graph(100))#
 ox.plot_graph(graph)                                 #
 ######################################################
 
@@ -52,7 +52,7 @@ def filling_odd_list(list_odd_node):
     return list_odd_node
 
 ###############################################################
-#                             PAIR                            #
+#                         GENERATE PAIR                       #
 ###############################################################
 
 '''genere toute les pairs possibles'''
@@ -100,26 +100,26 @@ def odd_vertices(n, edges):
             res.append(i)
     return res
 
-list_edges_sans_poids = []
-'''recupere juste le couple'''
-def recupere_edges_sans_poids(list_edges):
-    for i in range(len(list_edges)):
-        list_edges_sans_poids.append((list_edges[i][0],list_edges[i][1]))
-    return list_edges_sans_poids
 ###############################################################
-#                        LIST FINAL EDGE                      #
+#                        FINAL FUNCTIONS                      #
 ###############################################################
 
 '''donne la list finale de tous les edges'''
-def final_list(around):
-    edges, n = set_undirected(around)
+def final_list():
+    edges, n = set_undirected()
     odd_nodes = filling_odd_list(list_odd_node)
     possible_pair = generate_pair_possible(odd_nodes)
     best_pair_list = choice_best_new_pair(possible_pair,odd_nodes)
+    print("Nouvelles pairs construites:",best_pair_list)
     graph.add_edges_from(best_pair_list)   #ajoute les new pairs au graph
-    print("Eulerien:",nx.is_eulerian(graph))
     list_final = best_pair_list + edges 
     return list_final
+
+def find_eulerian_path():
+    if nx.is_eulerian(graph) == True:
+        eulerian_circuit = list(nx.eulerian_circuit(graph))
+    return eulerian_circuit
+    
 
 ###############################################################
 #                             MAIN                            #
@@ -127,6 +127,8 @@ def final_list(around):
 
 
 if __name__ == "__main__":
-    final_list(200)
-
+    final_list()
+    circuit = find_eulerian_path()
+    print()
+    print("Circuit eulerien:", circuit)
     
