@@ -26,16 +26,13 @@ print(graph)
         fill_edge_geometry=True)
 '''
 
-nodes, gdf_edges = ox.graph_to_gdfs(graph, nodes=True)
+nodes, gdf_edges = ox.graph_to_gdfs(graph,edges=True)
 
 # list of lats and lngs
 lngs = gdf_edges.head().centroid.map(lambda x: x.coords[0][0])
 lats = gdf_edges.head().centroid.map(lambda x: x.coords[0][1])
 
-print(nodes, "\n")
-print(gdf_edges, "\n")
-print(lngs, "\n")
-print(lats, "\n")
+
 # the lat, lng at the spatial center of the graph
 lng, lat = gdf_edges.unary_union.centroid.coords[0]
 center_point = lat, lng
@@ -43,12 +40,11 @@ center_point = lat, lng
 node_id = list(graph.nodes())[0]
 node2 = list(graph.nodes())[7]
 
+print(node_id, "\n")
+#for i in range(graph.number_of_edges()):
+ #   print(list(graph.edges())[i])
 
-#print(node_id, "\n")
-#print(nodes)
 
-print(graph.nodes[304699073])
-print(node2)
 #graph.nodes[node_id]['y']
 
 #shortestPath = nx.shortest_path(G, source= list(G.nodes())[10], target=list(G.nodes())[0], weight="10")
@@ -82,8 +78,8 @@ def dfs(graph,node):
             dfs(graph,n)
 
 
-dfs(graph, node_id)
-print(visited, "\n")
+#dfs(graph, node_id)
+#print(visited, "\n")
 
 
 """ Détermine le prochain sommet marqué """
@@ -152,7 +148,7 @@ Graphe = [[ 0, 2, 5, False, 3, False, False ],
 [ 3, False, 4, False, 0, False, False ],
 [ False, False, 2, False, False, 0, 1 ],
 [ False, 8, False, 5, False, 1, False ]]
-print(len(Graphe))
+
 
 
 
