@@ -79,15 +79,18 @@ def choice_best_new_pair(list_pair_edge,list_odd_nodes):
     for i in range(len(list_pair_edge)):
         if nx.dijkstra_path(graph,list_pair_edge[i][0],list_pair_edge[i][1]) <= min:
             min = nx.dijkstra_path(graph,list_pair_edge[i][0],list_pair_edge[i][1])
-    pair_return.append((min[0],min[-1]))#donne en poids le chemin de Dijsktra
+    pair_return.append((min[0],min[-1],min))#donne en poids le chemin de Dijsktra
     list_odd_nodes.remove(min[0])
     list_odd_nodes.remove(min[-1])
     if len(list_odd_nodes) != 0:
         remove_pair_in_list(list_pair_edge,min[0],min[-1])
         return choice_best_new_pair(list_pair_edge,list_odd_nodes)
     return pair_return
-
-
+'''met en place le nouveau poids'''
+def set_up_dist(dist):
+    info = graph.get_edge_data(dist[1],dist[2])
+    print(info[0]['length'])
+        
 '''renvoie une liste des noeuds qui sont de degrees impairs'''
 def odd_vertices(n, edges):
     L = [0] * n
@@ -111,8 +114,9 @@ def final_list():
     possible_pair = generate_pair_possible(odd_nodes)
     best_pair_list = choice_best_new_pair(possible_pair,odd_nodes)
     print("Nouvelles pairs construites:",best_pair_list)
+    set_up_dist(best_pair_list[0][2])
     graph.add_edges_from(best_pair_list)   #ajoute les new pairs au graph
-    list_final = best_pair_list + edges 
+    list_final = best_pair_list + edges
     return list_final
 
 def find_eulerian_path():
