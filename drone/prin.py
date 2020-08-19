@@ -23,6 +23,7 @@ ox.__version__
 list_odd_node = []
 list_edge = []
 list_pair_edge = []
+list_weight_new_pair = []
 pair_return = []
 eulerian_circuit = []
 
@@ -86,10 +87,25 @@ def choice_best_new_pair(list_pair_edge,list_odd_nodes):
         remove_pair_in_list(list_pair_edge,min[0],min[-1])
         return choice_best_new_pair(list_pair_edge,list_odd_nodes)
     return pair_return
-'''met en place le nouveau poids'''
-def set_up_dist(dist):
-    info = graph.get_edge_data(dist[1],dist[2])
-    print(info[0]['length'])
+
+'''met en place le nouveau poids de chaque nouvelle pair'''
+def set_up_dist(best_pair_list):
+    tmp = []
+    somme = 0.0
+    for pair in best_pair_list:
+        somme = 0.0
+        tmp = []
+        for j in range(len(pair[2]) - 1):
+            info = graph.get_edge_data(pair[2][j],pair[2][j + 1])
+            tmp.append(info[0]['length'])
+        for i in range(len(tmp)):
+            somme += tmp[i]
+        pairx = list(pair)
+        pairx.pop(-1)
+        pairx.append(somme)
+        pair = tuple(pairx)
+        list_weight_new_pair.append(pair)
+    return list_weight_new_pair
         
 '''renvoie une liste des noeuds qui sont de degrees impairs'''
 def odd_vertices(n, edges):
@@ -113,9 +129,11 @@ def final_list():
     odd_nodes = filling_odd_list(list_odd_node)
     possible_pair = generate_pair_possible(odd_nodes)
     best_pair_list = choice_best_new_pair(possible_pair,odd_nodes)
-    print("Nouvelles pairs construites:",best_pair_list)
-    set_up_dist(best_pair_list[0][2])
-    graph.add_edges_from(best_pair_list)   #ajoute les new pairs au graph
+    #print("Nouvelles pairs construites:\n",best_pair_list)
+    dist = set_up_dist(best_pair_list)
+    print(dist)
+    graph.add_edges_from(best_pair_list)
+    print()
     list_final = best_pair_list + edges
     return list_final
 
