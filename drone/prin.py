@@ -129,12 +129,12 @@ def final_list():
     odd_nodes = filling_odd_list(list_odd_node)
     possible_pair = generate_pair_possible(odd_nodes)
     best_pair_list = choice_best_new_pair(possible_pair,odd_nodes)
-    #print("Nouvelles pairs construites:\n",best_pair_list)
+    print("Nouvelles pairs construites:\n",best_pair_list)
     dist = set_up_dist(best_pair_list)
-    print(dist)
-    graph.add_edges_from(best_pair_list)
     print()
-    list_final = best_pair_list + edges
+    print("Distance set up aux new pairs:\n",dist)
+    graph.add_edges_from(dist)
+    list_final = dist + edges
     return list_final
 
 def find_eulerian_path():
