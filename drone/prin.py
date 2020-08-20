@@ -21,6 +21,7 @@ ox.__version__
 ###############################################################
 
 list_odd_node = []
+list_nodes = []
 list_edge = []
 list_pair_edge = []
 list_weight_new_pair = []
@@ -37,11 +38,13 @@ def display_part_of_graph(around):
 def set_undirected():
     number_node = graph.number_of_nodes()
     edges = [(u,v,w['length']) for u,v,w in graph.edges(data = True)]
-    return edges, number_node
+    list_nodes = list(graph.nodes())
+    return edges, number_node, list_nodes
 
 ###################################################### 
-graph = ox.get_undirected(display_part_of_graph(100))#
-ox.plot_graph(graph)                                 #
+graph = ox.get_undirected(display_part_of_graph(150))#
+ox.plot_graph(graph,show=True)
+#nx.draw(graph, with_labels = True)                   #
 ######################################################
 
 '''remplit la list avec les noeuds qui ont des degrees impairs'''
@@ -80,7 +83,7 @@ def choice_best_new_pair(list_pair_edge,list_odd_nodes):
     for i in range(len(list_pair_edge)):
         if nx.dijkstra_path(graph,list_pair_edge[i][0],list_pair_edge[i][1]) <= min:
             min = nx.dijkstra_path(graph,list_pair_edge[i][0],list_pair_edge[i][1])
-    pair_return.append((min[0],min[-1],min))#donne en poids le chemin de Dijsktra
+    pair_return.append((min[0],min[-1],min))
     list_odd_nodes.remove(min[0])
     list_odd_nodes.remove(min[-1])
     if len(list_odd_nodes) != 0:
@@ -107,25 +110,14 @@ def set_up_dist(best_pair_list):
         list_weight_new_pair.append(pair)
     return list_weight_new_pair
         
-'''renvoie une liste des noeuds qui sont de degrees impairs'''
-def odd_vertices(n, edges):
-    L = [0] * n
-    res = []
-    for i in range(0, len(edges)):
-        L[edges[i][0]] += 1
-        L[edges[i][1]] += 1
-    for i in range(n):
-        if (L[i] % 2 == 1):
-            res.append(i)
-    return res
-
 ###############################################################
 #                        FINAL FUNCTIONS                      #
 ###############################################################
 
 '''donne la list finale de tous les edges'''
 def final_list():
-    edges, n = set_undirected()
+    deg = nx.degree(graph)
+    edges, n, list_nodes = set_undirected()
     odd_nodes = filling_odd_list(list_odd_node)
     possible_pair = generate_pair_possible(odd_nodes)
     best_pair_list = choice_best_new_pair(possible_pair,odd_nodes)
@@ -135,22 +127,45 @@ def final_list():
     print("Distance set up aux new pairs:\n",dist)
     graph.add_edges_from(dist)
     list_final = dist + edges
+    return list_final,n,list_nodes
+    edges, n = set_undirected()
+    odd_nodes = filling_odd_list(list_odd_node)
+    possible_pair = generate_pair_possible(odd_nodes)
+    best_pair_list = choice_best_new_pair(possible_pair,odd_nodes)
+    print("Nouvelles pairs construites:\n",best_pair_list)
+    dist = set_up_dist(best_pair_list)
+    print()
+    print("Distance set up aux new pairs:\n",dist)
+    print()
+    print("edges:\n", len(edges))
+    print(nx.is_eulerian(graph))
+    graph.add_edges_from(dist)
+    list_final = dist + edges
     return list_final
 
 def find_eulerian_path():
     if nx.is_eulerian(graph) == True:
         eulerian_circuit = list(nx.eulerian_circuit(graph))
     return eulerian_circuit
-    
 
+def hier():
+    list_final, n, list_nodes = final_list()
+    curr_path = [list_nodes[0]]
+    circuit = []
+    
+    while curr_path:
+        curr_v = curr_path[-1]
+    
 ###############################################################
 #                             MAIN                            #
 ###############################################################
 
 
 if __name__ == "__main__":
-    final_list()
+    hier()
     circuit = find_eulerian_path()
     print()
     print("Circuit eulerien:", circuit)
+    print()
+    
     
