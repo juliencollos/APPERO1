@@ -23,10 +23,13 @@ ox.__version__
 list_odd_node = []
 list_nodes = []
 list_edge = []
+list_edges_sans_poids = []
 list_pair_edge = []
 list_weight_new_pair = []
 pair_return = []
 eulerian_circuit = []
+node_dictionnary = dict()
+
 
 ###############################################################
 #                             GRAPH                           #
@@ -41,11 +44,11 @@ def set_undirected():
     list_nodes = list(graph.nodes())
     return edges, number_node, list_nodes
 
-###################################################### 
-graph = ox.get_undirected(display_part_of_graph(150))#
-ox.plot_graph(graph,show=True)
-#nx.draw(graph, with_labels = True)                   #
-######################################################
+########################################################
+graph = ox.get_undirected(display_part_of_graph(120))  #
+ox.plot_graph(graph,show=True,node_size = 60,save=True)#
+nx.draw(graph, with_labels = True)                     #
+########################################################
 
 '''remplit la list avec les noeuds qui ont des degrees impairs'''
 def filling_odd_list(list_odd_node):
@@ -54,6 +57,7 @@ def filling_odd_list(list_odd_node):
         if deg[node] % 2 != 0:
             list_odd_node.append(node)
     return list_odd_node
+
 
 ###############################################################
 #                         GENERATE PAIR                       #
@@ -91,6 +95,8 @@ def choice_best_new_pair(list_pair_edge,list_odd_nodes):
         return choice_best_new_pair(list_pair_edge,list_odd_nodes)
     return pair_return
 
+
+
 '''met en place le nouveau poids de chaque nouvelle pair'''
 def set_up_dist(best_pair_list):
     tmp = []
@@ -109,39 +115,53 @@ def set_up_dist(best_pair_list):
         pair = tuple(pairx)
         list_weight_new_pair.append(pair)
     return list_weight_new_pair
+
+###############################################################
+#                      GENERATE DICT NODES                    #
+###############################################################
+
+'''recupere la liste des edges sans le poids
+   afin de pouvoir creer mon dictionnaire plus tard
+'''
+def recupere_edges_sans_poids(list_edges):
+    for i in range(len(list_edges)):
+        list_edges_sans_poids.append((list_edges[i][0],list_edges[i][1]))
+    return list_edges_sans_poids
         
+def creation_list_for_my_dict(list_nodes, list_edges_sans_poids):
+    list_stockage = []
+    tmp = []
+    for i in range(len(list_nodes)):
+        tmp = []
+        for j in range(len(list_edges_sans_poids)):
+            if list_nodes[i] == list_edges_sans_poids[j][0]:
+                if list_edges_sans_poids[j][1] not in tmp:
+                    tmp.append(list_edges_sans_poids[j][1])
+            if list_nodes[i] == list_edges_sans_poids[j][1]:
+                if list_edges_sans_poids[j][0] not in tmp:
+                    tmp.append(list_edges_sans_poids[j][0])
+        list_stockage.append((list_nodes[i],tmp))
+    return list_stockage
+
+def filling_dict(list_stockage):
+    return node_dictionnary
+
 ###############################################################
 #                        FINAL FUNCTIONS                      #
 ###############################################################
 
-'''donne la list finale de tous les edges'''
 def final_list():
-    deg = nx.degree(graph)
     edges, n, list_nodes = set_undirected()
     odd_nodes = filling_odd_list(list_odd_node)
     possible_pair = generate_pair_possible(odd_nodes)
+    list_edges_sans_poids = recupere_edges_sans_poids(edges)
+    list_stockage = creation_list_for_my_dict(list_nodes,list_edges_sans_poids)
+    print("list pour dico", list_stockage)
     best_pair_list = choice_best_new_pair(possible_pair,odd_nodes)
-    print("Nouvelles pairs construites:\n",best_pair_list)
     dist = set_up_dist(best_pair_list)
-    print()
-    print("Distance set up aux new pairs:\n",dist)
     graph.add_edges_from(dist)
     list_final = dist + edges
     return list_final,n,list_nodes
-    edges, n = set_undirected()
-    odd_nodes = filling_odd_list(list_odd_node)
-    possible_pair = generate_pair_possible(odd_nodes)
-    best_pair_list = choice_best_new_pair(possible_pair,odd_nodes)
-    print("Nouvelles pairs construites:\n",best_pair_list)
-    dist = set_up_dist(best_pair_list)
-    print()
-    print("Distance set up aux new pairs:\n",dist)
-    print()
-    print("edges:\n", len(edges))
-    print(nx.is_eulerian(graph))
-    graph.add_edges_from(dist)
-    list_final = dist + edges
-    return list_final
 
 def find_eulerian_path():
     if nx.is_eulerian(graph) == True:
@@ -153,8 +173,7 @@ def hier():
     curr_path = [list_nodes[0]]
     circuit = []
     
-    while curr_path:
-        curr_v = curr_path[-1]
+        
     
 ###############################################################
 #                             MAIN                            #
@@ -168,4 +187,5 @@ if __name__ == "__main__":
     print("Circuit eulerien:", circuit)
     print()
     
+
     
