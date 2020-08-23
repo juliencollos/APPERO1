@@ -28,14 +28,16 @@ graph = nx.classes.multigraph.MultiGraph
 #                             GRAPH                           #
 ###############################################################
 def set_graph(is_oriented):
-    if is_oriented == True:
+    if is_oriented == False:
          graph = ox.get_undirected(display_part_of_graph(120))
          ox.plot_graph(graph,show=True,node_size = 60,save=True)
          nx.draw(graph, with_labels = True)
+         print("Strongly connected: False")
     else:
         graph = display_part_of_graph(120)
         ox.plot_graph(graph,show=True,node_size = 60,save=True)
         nx.draw(graph, with_labels = True)
+        print("Strongly connected:", nx.is_strongly_connected(graph))
     return graph
         
              
@@ -160,7 +162,6 @@ def final_list(is_oriented):
     best_pair_list = choice_best_new_pair(possible_pair,odd_nodes,graph)
     dist = set_up_dist(best_pair_list,graph)
     graph.add_edges_from(dist)
-    list_final = dist + edges
     circuit = find_eulerian_path(graph)
     print()
     print("Circuit eulerien:", circuit)
@@ -171,7 +172,7 @@ def final_list(is_oriented):
 #                             MAIN                            #
 ###############################################################
 
-final_list(False)
+final_list(True)
     
 
     
