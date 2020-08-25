@@ -54,6 +54,7 @@ def set_undirected(graph):
 '''remplit la list avec les noeuds qui ont des degrees impairs'''
 def filling_odd_list(list_odd_node,graph):
     deg = nx.degree(graph)
+    print(deg)
     for node in graph.nodes():
         if deg[node] % 2 != 0:
             list_odd_node.append(node)
@@ -85,9 +86,11 @@ def remove_pair_in_list(list_pair_edge,a,b):
 '''genere la meilleure pair possible'''         
 def choice_best_new_pair(list_pair_edge,list_odd_nodes,graph):
     min = nx.dijkstra_path(graph,list_odd_nodes[0],list_odd_nodes[1])
+    
     for i in range(len(list_pair_edge)):
         if nx.dijkstra_path(graph,list_pair_edge[i][0],list_pair_edge[i][1]) <= min:
             min = nx.dijkstra_path(graph,list_pair_edge[i][0],list_pair_edge[i][1])
+            print("je suis min",list_pair_edge[i][0])
     pair_return.append((min[0],min[-1],min))
     list_odd_nodes.remove(min[0])
     list_odd_nodes.remove(min[-1])
@@ -157,6 +160,7 @@ def find_eulerian_path(graph):
 def final_list(is_oriented):
     graph = set_graph(is_oriented)
     edges, n, list_nodes = set_undirected(graph)
+    print(edges)
     odd_nodes = filling_odd_list(list_odd_node,graph)
     possible_pair = generate_pair_possible(odd_nodes)
     best_pair_list = choice_best_new_pair(possible_pair,odd_nodes,graph)
@@ -172,7 +176,7 @@ def final_list(is_oriented):
 #                             MAIN                            #
 ###############################################################
 
-final_list(True)
+final_list(False)
     
 
     
