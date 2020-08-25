@@ -67,6 +67,7 @@ def get_weight(a,b,edge_list):
             return edge[2]
         if edge[1] == a and edge[0] == b:
             return edge[2]
+    return 0
         
 def get_neighbours(edge_list, u):
     list_neighbours = []
@@ -74,7 +75,7 @@ def get_neighbours(edge_list, u):
         if u == edge_list[i][0]:
             list_neighbours.append(edge_list[i][1])
         if u == edge_list[i][1]:
-            list_neighbours.append(edge_list[i][1])
+            list_neighbours.append(edge_list[i][0])
             
     return list(set(list_neighbours))
     
@@ -87,26 +88,26 @@ def dijkstra(src, list_node, edge_list):
         dist[vertex] = float("inf")
         previous[vertex] = None
     dist[src] = 0
-    print(dist)
     
     Q = set(list_node)
-    print("Q:", Q)
     
     while len(Q) > 0:
         u = min(Q, key=lambda vertex: dist[vertex])
         Q.discard(u)
-        print(u)
+        
         if dist[u] == float('inf'):
             break
-        
         neighbours = get_neighbours(edge_list, u)
         
         for node in neighbours:
-            alt = float(dist[u]) + get_weight(u,node,edge_list)
+            weigth = get_weight(u,node,edge_list)
+            alt = float(dist[u]) + weigth
             if alt < dist[node]:
                 dist[node] = alt
                 previous[node] = u
-    return previous
+    return dist
+
+
 ###############################################################
 #                         GENERATE PAIR                       #
 ###############################################################
