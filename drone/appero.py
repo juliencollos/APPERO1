@@ -105,8 +105,19 @@ def dijkstra(src, list_node, edge_list):
             if alt < dist[node]:
                 dist[node] = alt
                 previous[node] = u
-    return dist
+    return dist, previous
 
+def dijkstra_path(src, target, list_node, edge_list):
+    dist, prev = dijkstra(src, list_node, edge_list)
+    print(dist)
+    path = []
+    debut = target
+    while debut != src:
+        path.append(debut)
+        debut = prev[debut]
+    pathx = path.copy()
+    pathx.reverse()
+    return pathx
 
 ###############################################################
 #                         GENERATE PAIR                       #
@@ -131,5 +142,5 @@ def solve(is_oriented, num_vertices, edge_list):
     list_odd_nodes = odd_vertices(num_vertices,edge_list)
     possible_pair = generate_pair_possible(list_odd_nodes)
     node = get_node_list(edge_list)
-    print(dijkstra(node[0],node,edge_list))
+    print(dijkstra_path(node[0],node[5],node,edge_list))
 solve(True,7,edge_list)
