@@ -9,7 +9,7 @@ ox.config(use_cache=True, log_console=True)
 ox.__version__
 
 edge_list = [(3735398272, 7403380099, 14.988), (3735398272, 5272829472, 5.636), (5272829472, 2625939755, 67.029), (5272829472, 2625939755, 101.267), (7403380099, 1511544620, 58.423), (7403380099, 7403380101, 33.039), (7403380100, 7403380101, 47.11), (7403380100, 7403380101, 142.62199999999999), (7403380100, 1511544620, 61.469)]
-
+#edge_list = [(0, 1, -1), (0, 2, 4), (1, 2, 3), (1, 3, 2), (1, 4, 2), (3, 2, 5),(3, 1, 1),(4, 3, -3) ]
 ###############################################################
 #                       SUPPORT FUNCTIONS                     #
 ###############################################################
@@ -44,20 +44,74 @@ def odd_vertices(n, edge_list):
                     res2.append(edge_list[i][1])
     list_odd_nodes = res + res2
     list_odd_nodesx = list(set(list_odd_nodes))
-    print(list_odd_nodesx)
     return list_odd_nodesx
+
+def get_node_list(edge_list):
+    list_node = []
+    visited = []
+    for i in range(len(edge_list)):
+        if edge_list[i][0] not in visited:
+            list_node.append(edge_list[i][0])
+        if edge_list[i][1] not in visited:
+            list_node.append(edge_list[i][1])
+    return list(set(list_node))
+            
 
 ###############################################################
 #                            DIJKSTRA                         #
 ###############################################################
 
-def initialisation()
+def get_weight(a,b,edge_list):
+    for edge in edge_list:
+        if edge[0] == a and edge[1] == b:
+            return edge[2]
+        if edge[1] == a and edge[0] == b:
+            return edge[2]
+        
+def get_neighbours(edge_list, u):
+    list_neighbours = []
+    for i in range(len(edge_list)):
+        if u == edge_list[i][0]:
+            list_neighbours.append(edge_list[i][1])
+        if u == edge_list[i][1]:
+            list_neighbours.append(edge_list[i][1])
+            
+    return list(set(list_neighbours))
+    
 
+def dijkstra(src, list_node, edge_list):
+    dist = dict()
+    previous = dict()
+    
+    for vertex in list_node:
+        dist[vertex] = float("inf")
+        previous[vertex] = None
+    dist[src] = 0
+    print(dist)
+    
+    Q = set(list_node)
+    print("Q:", Q)
+    
+    while len(Q) > 0:
+        u = min(Q, key=lambda vertex: dist[vertex])
+        Q.discard(u)
+        print(u)
+        if dist[u] == float('inf'):
+            break
+        
+        neighbours = get_neighbours(edge_list, u)
+        
+        for node in neighbours:
+            alt = float(dist[u]) + get_weight(u,node,edge_list)
+            if alt < dist[node]:
+                dist[node] = alt
+                previous[node] = u
+    return previous
 ###############################################################
 #                         GENERATE PAIR                       #
 ###############################################################
 
-'''genere toute les pairs possibles'''
+'''genere toutes les paires possibles'''
 def generate_pair_possible(list_odd_nodes):
     list_pair_edge = []
     for i in range(len(list_odd_nodes)):
@@ -66,9 +120,6 @@ def generate_pair_possible(list_odd_nodes):
                 if (list_odd_nodes[i],list_odd_nodes[j]) not in list_pair_edge or (list_odd_nodes[j],list_odd_nodes[i]) not in list_pair_edge:
                     list_pair_edge.append((list_odd_nodes[i],list_odd_nodes[j]))
     return list_pair_edge
-
-'''genere la meilleure pair possible'''         
-def choice_best_new_pair(list_pair_edge,list_odd_nodes):
     
 
 ###############################################################
@@ -78,6 +129,6 @@ def choice_best_new_pair(list_pair_edge,list_odd_nodes):
 def solve(is_oriented, num_vertices, edge_list):
     list_odd_nodes = odd_vertices(num_vertices,edge_list)
     possible_pair = generate_pair_possible(list_odd_nodes)
-    best_pair_list = choice_best_new_pair(possible_pair,list_odd_nodes)
-    
+    node = get_node_list(edge_list)
+    print(dijkstra(node[0],node,edge_list))
 solve(True,7,edge_list)

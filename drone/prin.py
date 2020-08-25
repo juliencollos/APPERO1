@@ -176,7 +176,8 @@ def final_list(is_oriented):
 #                             MAIN                            #
 ###############################################################
 
-final_list(False)
-    
+final_list(True)
+
+
 
     
