@@ -2,14 +2,15 @@
 """
 Created on Tue Aug 25 12:21:16 2020
 
-@author: julie
+@author: julien
 """
 import osmnx as ox
 ox.config(use_cache=True, log_console=True)
 ox.__version__
 
+pair_return = []
 edge_list = [(3735398272, 7403380099, 14.988), (3735398272, 5272829472, 5.636), (5272829472, 2625939755, 67.029), (5272829472, 2625939755, 101.267), (7403380099, 1511544620, 58.423), (7403380099, 7403380101, 33.039), (7403380100, 7403380101, 47.11), (7403380100, 7403380101, 142.62199999999999), (7403380100, 1511544620, 61.469)]
-#edge_list = [(0, 1, -1), (0, 2, 4), (1, 2, 3), (1, 3, 2), (1, 4, 2), (3, 2, 5),(3, 1, 1),(4, 3, -3) ]
+
 ###############################################################
 #                       SUPPORT FUNCTIONS                     #
 ###############################################################
@@ -134,6 +135,50 @@ def generate_pair_possible(list_odd_nodes):
                     list_pair_edge.append((list_odd_nodes[i],list_odd_nodes[j]))
     return list_pair_edge
 
+'''supprime les pairs deja obetnue apres dijkstra'''
+def remove_pair_in_list(list_pair_edge,a,b):
+    tmp = list_pair_edge.copy()
+    n = len(tmp)
+    for i in range(n):
+        if list_pair_edge[i][0] == a or list_pair_edge[i][1] == a or list_pair_edge[i][0] == b or list_pair_edge[i][1] == b:
+            list_pair_edge.remove(list_pair_edge[i])
+            return remove_pair_in_list(list_pair_edge,a,b)
+        
+'''genere la meilleure pair possible'''         
+def choice_best_new_pair(list_pair_edge,list_odd_nodes,node,edge_list):
+    min = dijkstra_path(list_odd_nodes[0],list_odd_nodes[1],node,edge_list)
+    
+    for i in range(len(list_pair_edge)):
+        if dijkstra_path(list_pair_edge[i][0],list_pair_edge[i][1], node, edge_list) <= min:
+            min = dijkstra_path(list_pair_edge[i][0],list_pair_edge[i][1], node, edge_list)
+    pair_return.append((min[0],min[-1],min))
+    list_odd_nodes.remove(min[0])
+    list_odd_nodes.remove(min[-1])
+    if len(list_odd_nodes) != 0:
+        remove_pair_in_list(list_pair_edge,min[0],min[-1])
+        return choice_best_new_pair(list_pair_edge,list_odd_nodes, node, edge_list)
+    return pair_return
+
+
+'''met en place le nouveau poids de chaque nouvelle pair'''
+def set_up_dist(best_pair_list, edge_list):
+    list_weight_new_pair = []
+    tmp = []
+    somme = 0.0
+    for pair in best_pair_list:
+        somme = 0.0
+        tmp = []
+        for j in range(len(pair[2]) - 1):
+            info = get_weight(pair[2][j],pair[2][j + 1], edge_list)
+            tmp.append(info)
+        for i in range(len(tmp)):
+            somme += tmp[i]
+        pairx = list(pair)
+        pairx.pop(-1)
+        pairx.append(somme)
+        pair = tuple(pairx)
+        list_weight_new_pair.append(pair)
+    return list_weight_new_pair
 
 ###############################################################
 #                             MAIN                            #
@@ -141,9 +186,11 @@ def generate_pair_possible(list_odd_nodes):
 
 def solve(is_oriented, num_vertices, edge_list):
     list_odd_nodes = odd_vertices(num_vertices,edge_list)
-    possible_pair = generate_pair_possible(list_odd_nodes)
+    
     node = get_node_list(edge_list)
-    print("List odd node:\n", list_odd_nodes)
-    print("Possible pair:\n", possible_pair)
-    print("Dijktra:\n", dijkstra_path(list_odd_nodes[0],list_odd_nodes[2],node,edge_list))
+    possible_pair = generate_pair_possible(list_odd_nodes)
+    best_pair = choice_best_new_pair(possible_pair, list_odd_nodes, node, edge_list)
+    dist = set_up_dist(best_pair, edge_list)
+    
+    
 solve(True,7,edge_list)
