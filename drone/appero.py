@@ -17,6 +17,7 @@ edge_list = [(3735398272, 7403380099, 14.988), (3735398272, 5272829472, 5.636), 
 
 '''renvoie une liste des noeuds qui sont de degrees impairs'''
 def odd_vertices(n, edge_list):
+    count = 0
     res = []
     res2 = []
     somme = 0
@@ -32,7 +33,8 @@ def odd_vertices(n, edge_list):
                     somme += 1
             visited.append(edge_list[i][0])
             if somme % 2 != 0:
-                    res.append(edge_list[i][0])
+                res.append(edge_list[i][0])
+                count += 1
     '''regarde pour le deuxieme element du couple'''
     for i in range(0, len(edge_list)):
         somme2 = 0
@@ -42,10 +44,11 @@ def odd_vertices(n, edge_list):
                     somme2 += 1
             visited2.append(edge_list[i][1])
             if somme2 % 2 != 0:
-                    res2.append(edge_list[i][1])
+                res2.append(edge_list[i][1])
+                count += 1
     list_odd_nodes = res + res2
     list_odd_nodesx = list(set(list_odd_nodes))
-    return list_odd_nodesx
+    return list_odd_nodesx, count
 
 def get_node_list(edge_list):
     list_node = []
@@ -81,6 +84,13 @@ def get_adj_list(edge_list, list_node):
         neighbours = get_neighbours(edge_list, node)
         adj_list.append(neighbours)
     return adj_list
+
+def is_eulerian(num_vertices, edge_list):
+    _, count = odd_vertices(num_vertices, edge_list)
+    print(count)
+    if count == 2 or count == 0:
+        return True
+    return False
 
 ###############################################################
 #                            DIJKSTRA                         #
@@ -215,14 +225,15 @@ def Hierholzer(edge_list, list_node):
 ###############################################################
 
 def solve(is_oriented, num_vertices, edge_list):
-    list_odd_nodes = odd_vertices(num_vertices,edge_list)
+    list_odd_nodes, _ = odd_vertices(num_vertices,edge_list)
     node = get_node_list(edge_list)
-    
+
     possible_pair = generate_pair_possible(list_odd_nodes)
     best_pair = choice_best_new_pair(possible_pair, list_odd_nodes, node, edge_list)
     new_pair_with_theirs_dist = set_up_dist(best_pair, edge_list)
-    edge_list.append(new_pair_with_theirs_dist)
-    Hierholzer(edge_list, node)
+    new_edge_list = edge_list + new_pair_with_theirs_dist
+    
+    Hierholzer(new_edge_list, node)
     
     
-solve(True,7,edge_list)
+solve(False,7,edge_list)
