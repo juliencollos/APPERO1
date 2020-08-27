@@ -57,11 +57,6 @@ def get_node_list(edge_list):
             list_node.append(edge_list[i][1])
     return list(set(list_node))
             
-
-###############################################################
-#                            DIJKSTRA                         #
-###############################################################
-
 def get_weight(a,b,edge_list):
     for edge in edge_list:
         if edge[0] == a and edge[1] == b:
@@ -77,9 +72,19 @@ def get_neighbours(edge_list, u):
             list_neighbours.append(edge_list[i][1])
         if u == edge_list[i][1]:
             list_neighbours.append(edge_list[i][0])
-            
     return list(set(list_neighbours))
+
+def get_adj_list(edge_list, list_node):
+    adj_list = []
     
+    for node in list_node:
+        neighbours = get_neighbours(edge_list, node)
+        adj_list.append(neighbours)
+    return adj_list
+
+###############################################################
+#                            DIJKSTRA                         #
+###############################################################
 
 def dijkstra(src, list_node, edge_list):
     dist = dict()
@@ -181,16 +186,43 @@ def set_up_dist(best_pair_list, edge_list):
     return list_weight_new_pair
 
 ###############################################################
+#                          Hierholzer                         #
+###############################################################
+
+def Hierholzer_algo(adj, edge_list, list_node):
+    start = list_node[0]
+    current_path = [start]
+    circuit = []
+    
+    while current_path:
+        current_v = current_path[-1]
+        if adj[list_node.index(current_v)]:
+            next_v = adj[list_node.index(current_v)].pop()
+            current_path.append(next_v)
+        else:
+            circuit.append(current_path.pop())
+    for i in range(len(circuit) - 1, -1, -1): 
+        print(circuit[i], end = "") 
+        if i: 
+            print(" -> ", end = "")
+            
+def Hierholzer(edge_list, list_node):
+    adj = get_adj_list(edge_list, list_node)
+    return Hierholzer_algo(adj, edge_list, list_node)
+    
+###############################################################
 #                             MAIN                            #
 ###############################################################
 
 def solve(is_oriented, num_vertices, edge_list):
     list_odd_nodes = odd_vertices(num_vertices,edge_list)
-    
     node = get_node_list(edge_list)
+    
     possible_pair = generate_pair_possible(list_odd_nodes)
     best_pair = choice_best_new_pair(possible_pair, list_odd_nodes, node, edge_list)
-    dist = set_up_dist(best_pair, edge_list)
+    new_pair_with_theirs_dist = set_up_dist(best_pair, edge_list)
+    edge_list.append(new_pair_with_theirs_dist)
+    Hierholzer(edge_list, node)
     
     
 solve(True,7,edge_list)
