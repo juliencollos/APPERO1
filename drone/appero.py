@@ -17,8 +17,9 @@ pair_return = []
 balanced_node = []
 
     
-edge_list = [(3735398272, 7403380099, 14.988), (3735398272, 5272829472, 5.636), (5272829472, 2625939755, 67.029), (5272829472, 2625939755, 101.267), (7403380099, 1511544620, 58.423), (7403380099, 7403380101, 33.039), (7403380100, 7403380101, 47.11), (7403380100, 7403380101, 142.62199999999999), (7403380100, 1511544620, 61.469)]
-#edge_list = [(0,1,1), (1,2,1), (2,3,1)]
+#edge_list = [(3735398272, 7403380099, 14.988), (3735398272, 5272829472, 5.636), (5272829472, 2625939755, 67.029), (5272829472, 2625939755, 101.267), (7403380099, 1511544620, 58.423), (7403380099, 7403380101, 33.039), (7403380100, 7403380101, 47.11), (7403380100, 7403380101, 142.62199999999999), (7403380100, 1511544620, 61.469)]
+edge_list = [(0,1,1), (0,2,1), (1,2,1), (2,3,1)]
+
 ###############################################################
 #                       SUPPORT FUNCTIONS                     #
 ###############################################################
@@ -115,12 +116,35 @@ def dfs(vertice, visited, list_node, edge_list):
             dfs(i, visited, list_node, edge_list)
     return visited
 
+'''dfs qui compte le nombre de sommet accessible à partir
+   d'un autre sommet
+'''
+def dfs_count(vertice, visited, list_node, edge_list):
+    visited[list_node.index(vertice)] = True
+    count = 1
+    neighbours = get_neighbours(edge_list, vertice)
+    
+    for i in neighbours:
+        if visited[list_node.index(i)] == False:
+            count = count + dfs_count(i, visited, list_node, edge_list)
+    return count
+    
 '''trasforme une arrete: (i,j) -> (j,i)'''
 def reverse_edge(edge_list):
     reverse_edge_list = []
     for edge in edge_list:
         reverse_edge_list.append((edge[1],edge[0],edge[2]))
     return reverse_edge_list
+
+''' supprime une arrete de la edge_list
+'''
+def remove_edge(a, b, edge_list):
+    for edge in edge_list:
+        if edge[0] == a and edge[1] == b:
+            edge_list.remove(edge)
+        if edge[1] == a and edge[0] == b:
+            edge_list.remove(edge)
+    return edge_list
 
 ###############################################################
 #                            DIJKSTRA                         #
@@ -257,9 +281,41 @@ def Hierholzer(edge_list, list_node):
     return Hierholzer_algo(adj, edge_list, list_node)
 
 ###############################################################
+#                           FLEURY                            #
+###############################################################
+
+def check_next_node(src, dest, edge_list, list_node):
+    cpy_edge_list = edge_list.copy()
+    
+    neighbours = get_neighbours(edge_list, src)
+    if len(neighbours) == 1:
+        return True
+    else:
+        visited = [False] * len(list_node)
+        count1 = dfs_count(src, visited, list_node, edge_list)
+        remove_edge(src, dest, edge_list)
+        visited = [False] * len(list_node)
+        count2 = dfs_count(src, visited, list_node, edge_list)
+        
+        cpy_edge_list.append((src,dest,get_weight(src, dest, edge_list)))
+        
+        return False if count1 > count2 else True
+
+def Fleury(src, edge_list, list_node):
+    neighbours = get_neighbours(edge_list, src)
+    
+    for node in neighbours:
+        if check_next_node(src, node, edge_list, list_node):
+            print("%d-%d " %(src, node))
+            remove_edge(src, node, edge_list)
+            Fleury(node, edge_list, list_node)
+    
+
+###############################################################
 #                     STRONGLY CONNECTED                      #
 ###############################################################
 
+''' regarde les arcs sortants et entrants'''
 def check_node_balanced(edge_list, list_node, next_node):
     count_entrant = 0
     count_sortant = 0
@@ -271,13 +327,14 @@ def check_node_balanced(edge_list, list_node, next_node):
             count_sortant += 1
             
     balanced_node.append((list_node[next_node], count_entrant, count_sortant))
-
         
     if next_node == len(list_node) - 1:
         return balanced_node
     return check_node_balanced(edge_list, list_node, next_node + 1)
 
-'''regarde si le graph est fortement connexe'''
+''' regarde si le graph est fortement connexe
+    Kosaraju's algorithm
+'''
 def is_strongly_connected(num_vertices, list_node, edge_list):
     visited = [False] * num_vertices
     dfs(list_node[0], visited, list_node, edge_list)
@@ -304,10 +361,12 @@ def solve_undirected(num_vertices, edge_list):
     list_odd_nodes, _ = odd_vertices(num_vertices,edge_list)
     node = get_node_list(edge_list)
     new_edge_list = create_new_edge_list(list_odd_nodes, node)
-    if is_eulerian(num_vertices, new_edge_list) == True:
-        print("Eularian path:\n", Hierholzer(new_edge_list, node))
+    Fleury(node[0], edge_list, node)
+    
         
-
+        
+        
+        
 def solve_directed(num_vertices, edge_list):
     node = get_node_list(edge_list)
     a = check_node_balanced(edge_list, node, 0)
@@ -319,4 +378,4 @@ def solve(is_oriented, num_vertices, edge_list):
     else:
         solve_directed(num_vertices, edge_list)
     
-solve(True,7,edge_list)
+solve(False,7,edge_list)
