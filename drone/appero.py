@@ -8,9 +8,17 @@ import osmnx as ox
 ox.config(use_cache=True, log_console=True)
 ox.__version__
 
-pair_return = []
-edge_list = [(3735398272, 7403380099, 14.988), (3735398272, 5272829472, 5.636), (5272829472, 2625939755, 67.029), (5272829472, 2625939755, 101.267), (7403380099, 1511544620, 58.423), (7403380099, 7403380101, 33.039), (7403380100, 7403380101, 47.11), (7403380100, 7403380101, 142.62199999999999), (7403380100, 1511544620, 61.469)]
+###############################################################
+#                       GLOBAL VARIABLE                       #
+###############################################################
 
+
+pair_return = []
+balanced_node = []
+
+    
+edge_list = [(3735398272, 7403380099, 14.988), (3735398272, 5272829472, 5.636), (5272829472, 2625939755, 67.029), (5272829472, 2625939755, 101.267), (7403380099, 1511544620, 58.423), (7403380099, 7403380101, 33.039), (7403380100, 7403380101, 47.11), (7403380100, 7403380101, 142.62199999999999), (7403380100, 1511544620, 61.469)]
+#edge_list = [(0,1,1), (1,2,1), (2,3,1)]
 ###############################################################
 #                       SUPPORT FUNCTIONS                     #
 ###############################################################
@@ -50,6 +58,7 @@ def odd_vertices(n, edge_list):
     list_odd_nodesx = list(set(list_odd_nodes))
     return list_odd_nodesx, count
 
+'''recupere tous les noeuds du graph dans une list'''
 def get_node_list(edge_list):
     list_node = []
     visited = []
@@ -59,7 +68,8 @@ def get_node_list(edge_list):
         if edge_list[i][1] not in visited:
             list_node.append(edge_list[i][1])
     return list(set(list_node))
-            
+
+'''recuepre le poids d'une arrete'''            
 def get_weight(a,b,edge_list):
     for edge in edge_list:
         if edge[0] == a and edge[1] == b:
@@ -67,7 +77,8 @@ def get_weight(a,b,edge_list):
         if edge[1] == a and edge[0] == b:
             return edge[2]
     return 0
-        
+   
+'''recupere les voisins d'un sommet'''     
 def get_neighbours(edge_list, u):
     list_neighbours = []
     for i in range(len(edge_list)):
@@ -77,6 +88,7 @@ def get_neighbours(edge_list, u):
             list_neighbours.append(edge_list[i][0])
     return list(set(list_neighbours))
 
+'''reupere l'adj list'''
 def get_adj_list(edge_list, list_node):
     adj_list = []
     
@@ -85,12 +97,30 @@ def get_adj_list(edge_list, list_node):
         adj_list.append(neighbours)
     return adj_list
 
+'''regarde si le graph est eulerien'''
 def is_eulerian(num_vertices, edge_list):
     _, count = odd_vertices(num_vertices, edge_list)
-    print(count)
     if count == 2 or count == 0:
         return True
     return False
+
+'''simple dfs'''
+def dfs(vertice, visited, list_node, edge_list):
+    visited[list_node.index(vertice)] = True
+    
+    neighbours = get_neighbours(edge_list, vertice)
+    
+    for i in neighbours:
+        if visited[list_node.index(i)] == False:
+            dfs(i, visited, list_node, edge_list)
+    return visited
+
+'''trasforme une arrete: (i,j) -> (j,i)'''
+def reverse_edge(edge_list):
+    reverse_edge_list = []
+    for edge in edge_list:
+        reverse_edge_list.append((edge[1],edge[0],edge[2]))
+    return reverse_edge_list
 
 ###############################################################
 #                            DIJKSTRA                         #
@@ -124,7 +154,7 @@ def dijkstra(src, list_node, edge_list):
     return dist, previous
 
 def dijkstra_path(src, target, list_node, edge_list):
-    dist, prev = dijkstra(src, list_node, edge_list)
+    _, prev = dijkstra(src, list_node, edge_list)
     path = []
     
     debut = target
@@ -195,8 +225,15 @@ def set_up_dist(best_pair_list, edge_list):
         list_weight_new_pair.append(pair)
     return list_weight_new_pair
 
+def create_new_edge_list(list_odd_nodes, node):
+    possible_pair = generate_pair_possible(list_odd_nodes)
+    best_pair = choice_best_new_pair(possible_pair, list_odd_nodes, node, edge_list)
+    new_pair_with_theirs_dist = set_up_dist(best_pair, edge_list)
+    new_edge_list = edge_list + new_pair_with_theirs_dist
+    return new_edge_list
+
 ###############################################################
-#                          Hierholzer                         #
+#                          HIERHOLZER                         #
 ###############################################################
 
 def Hierholzer_algo(adj, edge_list, list_node):
@@ -211,29 +248,75 @@ def Hierholzer_algo(adj, edge_list, list_node):
             current_path.append(next_v)
         else:
             circuit.append(current_path.pop())
-    for i in range(len(circuit) - 1, -1, -1): 
-        print(circuit[i], end = "") 
-        if i: 
-            print(" -> ", end = "")
+    circuitx = circuit.copy()
+    circuitx.reverse()
+    return circuitx
             
 def Hierholzer(edge_list, list_node):
     adj = get_adj_list(edge_list, list_node)
     return Hierholzer_algo(adj, edge_list, list_node)
+
+###############################################################
+#                     STRONGLY CONNECTED                      #
+###############################################################
+
+def check_node_balanced(edge_list, list_node, next_node):
+    count_entrant = 0
+    count_sortant = 0
+
+    for edge in edge_list:
+        if edge[0] == list_node[next_node]:
+            count_entrant += 1
+        if edge[1] == list_node[next_node]:
+            count_sortant += 1
+            
+    balanced_node.append((list_node[next_node], count_entrant, count_sortant))
+
+        
+    if next_node == len(list_node) - 1:
+        return balanced_node
+    return check_node_balanced(edge_list, list_node, next_node + 1)
+
+'''regarde si le graph est fortement connexe'''
+def is_strongly_connected(num_vertices, list_node, edge_list):
+    visited = [False] * num_vertices
+    dfs(list_node[0], visited, list_node, edge_list)
     
+    for node in visited:
+        if node == False:
+            return False
+        
+    reverse = reverse_edge(edge_list)
+    visited = [False] * num_vertices
+    dfs(list_node[0], visited, list_node, reverse)
+    
+    for node in visited:
+        if node == False:
+            return False
+    return True
+        
+
 ###############################################################
 #                             MAIN                            #
 ###############################################################
-
-def solve(is_oriented, num_vertices, edge_list):
+    
+def solve_undirected(num_vertices, edge_list):
     list_odd_nodes, _ = odd_vertices(num_vertices,edge_list)
     node = get_node_list(edge_list)
+    new_edge_list = create_new_edge_list(list_odd_nodes, node)
+    if is_eulerian(num_vertices, new_edge_list) == True:
+        print("Eularian path:\n", Hierholzer(new_edge_list, node))
+        
 
-    possible_pair = generate_pair_possible(list_odd_nodes)
-    best_pair = choice_best_new_pair(possible_pair, list_odd_nodes, node, edge_list)
-    new_pair_with_theirs_dist = set_up_dist(best_pair, edge_list)
-    new_edge_list = edge_list + new_pair_with_theirs_dist
+def solve_directed(num_vertices, edge_list):
+    node = get_node_list(edge_list)
+    a = check_node_balanced(edge_list, node, 0)
+    print("Check entrant/sortant:\n", a)
+
+def solve(is_oriented, num_vertices, edge_list):
+    if is_oriented == False:
+        solve_undirected(num_vertices, edge_list)
+    else:
+        solve_directed(num_vertices, edge_list)
     
-    Hierholzer(new_edge_list, node)
-    
-    
-solve(False,7,edge_list)
+solve(True,7,edge_list)
