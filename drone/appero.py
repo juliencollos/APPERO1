@@ -14,10 +14,13 @@ ox.__version__
 
 pair_return = []
 balanced_node = []
+    
+edge_list = [(0,1,1),(0,6,1), (1,2,1), (2,0,1), (2,3,1), (3,4,1), (4,2,1), (4,5,1), (5,0,1), (6,4,1)]
+
 
 #edge_list = [(3735398272, 7403380099, 14.988), (3735398272, 5272829472, 5.636), (5272829472, 2625939755, 67.029), (5272829472, 2625939755, 101.267), (7403380099, 1511544620, 58.423), (7403380099, 7403380101, 33.039), (7403380100, 7403380101, 47.11), (7403380100, 7403380101, 142.62199999999999), (7403380100, 1511544620, 61.469)]
-edge_list = [(1,0,1), (0,2,1), (2,1,1), (0,3,1), (3,4,1), (3,2,1), (3,1,1), (2,4,1), (3,4,2), (1,5,2), (5,3,1)]
-#edge_list = [(0,1,1), (1,2,1), (2,0,1), (0,1,4)]
+#edge_list = [(1,0,1), (0,2,1), (2,1,1), (0,3,1), (3,4,1), (3,2,1), (3,1,1), (2,4,1), (3,4,2), (1,5,2), (5,3,1)]
+#edge_list = [(0,1,1), (1,2,1), (2,0,1)]
 #edge_list = [(0,1,1), (0,2,1), (1,2,1), (2,3,1)]
 ###############################################################
 #                       SUPPORT FUNCTIONS                     #
@@ -88,12 +91,21 @@ def get_neighbours(edge_list, u):
             list_neighbours.append(edge_list[i][0])
     return list(set(list_neighbours))
 
+'''recupere les voisins d'un sommet oriente'''
+def get_neighbours_oriented(edge_list, u):
+    list_neighbours = []
+    for i in range(len(edge_list)):
+        if u == edge_list[i][0]:
+            list_neighbours.append(edge_list[i][1])
+    return list(set(list_neighbours))
+    
+
 '''reupere la list d'adjacence'''
 def get_adj_list(edge_list, list_node):
     adj_list = []
     
     for node in list_node:
-        neighbours = get_neighbours(edge_list, node)
+        neighbours = get_neighbours_oriented(edge_list, node)
         adj_list.append(neighbours)
     return adj_list
 
@@ -138,7 +150,7 @@ def reverse_edge(edge_list):
 
 ''' supprime une arrete de la edge_list
 '''
-def remove_edge(a, b, weigth,edge_list):
+def remove_edge(a, b, weigth, edge_list):
     for edge in edge_list:
         if edge[0] == a and edge[1] == b and edge[2] == weigth:
             edge_list.remove(edge)
@@ -279,12 +291,17 @@ def Hierholzer_algo(adj, edge_list, list_node):
             current_path.append(next_v)
         else:
             circuit.append(current_path.pop())
-    circuitx = circuit.copy()
-    circuitx.reverse()
-    return circuitx
+    #circuitx = circuit.copy()
+    #circuitx.reverse()
+    for i in range(len(circuit) - 1, -1, -1): 
+        print(circuit[i], end = "") 
+        if i: 
+            print(" -> ", end = "")
+    #return circuitx
             
 def Hierholzer(edge_list, list_node):
     adj = get_adj_list(edge_list, list_node)
+    print(adj)
     return Hierholzer_algo(adj, edge_list, list_node)
 
 ###############################################################
@@ -344,6 +361,21 @@ def check_node_balanced(edge_list, list_node, next_node):
         return balanced_node
     return check_node_balanced(edge_list, list_node, next_node + 1)
 
+'''separe en deux listes les noeuds positif et negatif
+'''
+def repartiotion_between_deg_ent_sort(balanced_node):
+    positive_node = []
+    negative_node = []
+    
+    for triplet in balanced_node:
+        if triplet[1] > triplet[2]:
+            positive_node.append(triplet[0])
+        if triplet[1] < triplet[2]:
+            negative_node.append(triplet[0])
+        else:
+            continue
+    return positive_node, negative_node
+
 ''' regarde si le graph est fortement connexe
     Kosaraju's algorithm
 '''
@@ -377,18 +409,19 @@ def solve_undirected(num_vertices, edge_list):
         tmp = reverse_edge(edge_list)
         new_edge_list = create_new_edge_list(list_odd_nodes, node)
         fleury_edge_list = tmp + new_edge_list
-        #print(remove_edge(node[3], node[4], get_weight(node[3], node[4], fleury_edge_list), fleury_edge_list))
         Fleury(odd_copy[0], fleury_edge_list, node)
     else:
         tmp = reverse_edge(edge_list)
         fleury_edge_list = edge_list + tmp
-        Fleury(node[0], fleury_edge_list, node)      
-
+        Fleury(node[0], fleury_edge_list, node)     
         
 def solve_directed(num_vertices, edge_list):
-    node = get_node_list(edge_list)
-    a = check_node_balanced(edge_list, node, 0)
-    print("Check entrant/sortant:\n", a)
+    if is_eulerian(num_vertices, edge_list) == True:    
+        node = get_node_list(edge_list)
+        Hierholzer(edge_list, node)
+    #balanced_node = check_node_balanced(edge_list, node, 0)
+    #positive_node, negative_node = repartiotion_between_deg_ent_sort(balanced_node)
+
 
 def solve(is_oriented, num_vertices, edge_list):
     if is_oriented == False:
