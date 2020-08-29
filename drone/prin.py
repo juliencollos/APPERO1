@@ -164,7 +164,8 @@ def final_list(is_oriented):
     possible_pair = generate_pair_possible(odd_nodes)
     best_pair_list = choice_best_new_pair(possible_pair,odd_nodes,graph)
     dist = set_up_dist(best_pair_list,graph)
-    print(dist)
+
+    print(edges)
     graph.add_edges_from(dist)
     circuit = find_eulerian_path(graph)
     print()

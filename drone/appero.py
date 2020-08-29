@@ -12,14 +12,13 @@ ox.__version__
 #                       GLOBAL VARIABLE                       #
 ###############################################################
 
-
 pair_return = []
 balanced_node = []
 
-    
 #edge_list = [(3735398272, 7403380099, 14.988), (3735398272, 5272829472, 5.636), (5272829472, 2625939755, 67.029), (5272829472, 2625939755, 101.267), (7403380099, 1511544620, 58.423), (7403380099, 7403380101, 33.039), (7403380100, 7403380101, 47.11), (7403380100, 7403380101, 142.62199999999999), (7403380100, 1511544620, 61.469)]
-edge_list = [(0,1,1), (0,2,1), (1,2,1), (2,3,1)]
-
+edge_list = [(1,0,1), (0,2,1), (2,1,1), (0,3,1), (3,4,1), (3,2,1), (3,1,1), (2,4,1), (3,4,2), (1,5,2), (5,3,1)]
+#edge_list = [(0,1,1), (1,2,1), (2,0,1), (0,1,4)]
+#edge_list = [(0,1,1), (0,2,1), (1,2,1), (2,3,1)]
 ###############################################################
 #                       SUPPORT FUNCTIONS                     #
 ###############################################################
@@ -70,7 +69,7 @@ def get_node_list(edge_list):
             list_node.append(edge_list[i][1])
     return list(set(list_node))
 
-'''recuepre le poids d'une arrete'''            
+'''recupere le poids d'une arrete'''            
 def get_weight(a,b,edge_list):
     for edge in edge_list:
         if edge[0] == a and edge[1] == b:
@@ -89,7 +88,7 @@ def get_neighbours(edge_list, u):
             list_neighbours.append(edge_list[i][0])
     return list(set(list_neighbours))
 
-'''reupere l'adj list'''
+'''reupere la list d'adjacence'''
 def get_adj_list(edge_list, list_node):
     adj_list = []
     
@@ -100,8 +99,9 @@ def get_adj_list(edge_list, list_node):
 
 '''regarde si le graph est eulerien'''
 def is_eulerian(num_vertices, edge_list):
-    _, count = odd_vertices(num_vertices, edge_list)
-    if count == 2 or count == 0:
+    list_odd, count = odd_vertices(num_vertices, edge_list)
+    
+    if len(list_odd) == 2 or len(list_odd) == 0:
         return True
     return False
 
@@ -129,7 +129,7 @@ def dfs_count(vertice, visited, list_node, edge_list):
             count = count + dfs_count(i, visited, list_node, edge_list)
     return count
     
-'''trasforme une arrete: (i,j) -> (j,i)'''
+'''transforme une arrete: (i,j) -> (j,i)'''
 def reverse_edge(edge_list):
     reverse_edge_list = []
     for edge in edge_list:
@@ -138,12 +138,19 @@ def reverse_edge(edge_list):
 
 ''' supprime une arrete de la edge_list
 '''
-def remove_edge(a, b, edge_list):
+def remove_edge(a, b, weigth,edge_list):
     for edge in edge_list:
-        if edge[0] == a and edge[1] == b:
+        if edge[0] == a and edge[1] == b and edge[2] == weigth:
             edge_list.remove(edge)
-        if edge[1] == a and edge[0] == b:
+        if edge[1] == a and edge[0] == b and edge[2] == weigth:
             edge_list.remove(edge)
+    return edge_list
+
+'''ajoute (i,j) et (j,i) à  la edge list
+'''
+def twice_add(edge_list, a, b):
+    edge_list.append((a,b, get_weight(a, b, edge_list)))
+    edge_list.append((b,a, get_weight(a, b, edge_list)))
     return edge_list
 
 ###############################################################
@@ -286,30 +293,35 @@ def Hierholzer(edge_list, list_node):
 
 def check_next_node(src, dest, edge_list, list_node):
     cpy_edge_list = edge_list.copy()
+    neighbours = get_neighbours(cpy_edge_list, src)
     
-    neighbours = get_neighbours(edge_list, src)
+    if neighbours == []:
+        return
+    
     if len(neighbours) == 1:
         return True
     else:
         visited = [False] * len(list_node)
-        count1 = dfs_count(src, visited, list_node, edge_list)
-        remove_edge(src, dest, edge_list)
+        count1 = dfs_count(src, visited, list_node, cpy_edge_list)
+        remove_edge(src, dest, get_weight(src, dest, cpy_edge_list),cpy_edge_list)
+        remove_edge(dest, src, get_weight(src, dest, cpy_edge_list), cpy_edge_list)
         visited = [False] * len(list_node)
-        count2 = dfs_count(src, visited, list_node, edge_list)
+        count2 = dfs_count(src, visited, list_node, cpy_edge_list)
+        twice_add(cpy_edge_list,src, dest)
         
-        cpy_edge_list.append((src,dest,get_weight(src, dest, edge_list)))
-        
-        return False if count1 > count2 else True
+        if count1 > count2:
+            return False
+        return True
 
 def Fleury(src, edge_list, list_node):
     neighbours = get_neighbours(edge_list, src)
-    
     for node in neighbours:
-        if check_next_node(src, node, edge_list, list_node):
+        if check_next_node(src, node, edge_list, list_node) == True:
             print("%d-%d " %(src, node))
-            remove_edge(src, node, edge_list)
+            remove_edge(src, node, get_weight(src, node, edge_list), edge_list)
+            remove_edge(node, src, get_weight(src, node, edge_list), edge_list)
             Fleury(node, edge_list, list_node)
-    
+            
 
 ###############################################################
 #                     STRONGLY CONNECTED                      #
@@ -352,7 +364,6 @@ def is_strongly_connected(num_vertices, list_node, edge_list):
             return False
     return True
         
-
 ###############################################################
 #                             MAIN                            #
 ###############################################################
@@ -360,12 +371,19 @@ def is_strongly_connected(num_vertices, list_node, edge_list):
 def solve_undirected(num_vertices, edge_list):
     list_odd_nodes, _ = odd_vertices(num_vertices,edge_list)
     node = get_node_list(edge_list)
-    new_edge_list = create_new_edge_list(list_odd_nodes, node)
-    Fleury(node[0], edge_list, node)
+    odd_copy = list_odd_nodes.copy()
     
-        
-        
-        
+    if is_eulerian(num_vertices, edge_list) == False:
+        tmp = reverse_edge(edge_list)
+        new_edge_list = create_new_edge_list(list_odd_nodes, node)
+        fleury_edge_list = tmp + new_edge_list
+        #print(remove_edge(node[3], node[4], get_weight(node[3], node[4], fleury_edge_list), fleury_edge_list))
+        Fleury(odd_copy[0], fleury_edge_list, node)
+    else:
+        tmp = reverse_edge(edge_list)
+        fleury_edge_list = edge_list + tmp
+        Fleury(node[0], fleury_edge_list, node)      
+
         
 def solve_directed(num_vertices, edge_list):
     node = get_node_list(edge_list)
@@ -378,4 +396,4 @@ def solve(is_oriented, num_vertices, edge_list):
     else:
         solve_directed(num_vertices, edge_list)
     
-solve(False,7,edge_list)
+solve(False, 7, edge_list)
