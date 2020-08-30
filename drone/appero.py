@@ -419,9 +419,6 @@ def solve_directed(num_vertices, edge_list):
     if is_eulerian(num_vertices, edge_list) == True:    
         node = get_node_list(edge_list)
         Hierholzer(edge_list, node)
-    #balanced_node = check_node_balanced(edge_list, node, 0)
-    #positive_node, negative_node = repartiotion_between_deg_ent_sort(balanced_node)
-
 
 def solve(is_oriented, num_vertices, edge_list):
     if is_oriented == False:
