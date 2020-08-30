@@ -18,10 +18,11 @@ balanced_node = []
 #edge_list = [(0,1,1),(0,6,1), (1,2,1), (2,0,1), (2,3,1), (3,4,1), (4,2,1), (4,5,1), (5,0,1), (6,4,1)]
 
 
-edge_list = [(3735398272, 7403380099, 14.988), (3735398272, 5272829472, 5.636), (5272829472, 2625939755, 67.029), (5272829472, 2625939755, 101.267), (7403380099, 1511544620, 58.423), (7403380099, 7403380101, 33.039), (7403380100, 7403380101, 47.11), (7403380100, 7403380101, 142.62199999999999), (7403380100, 1511544620, 61.469)]
+#edge_list = [(3735398272, 7403380099, 14.988), (3735398272, 5272829472, 5.636), (5272829472, 2625939755, 67.029), (5272829472, 2625939755, 101.267), (7403380099, 1511544620, 58.423), (7403380099, 7403380101, 33.039), (7403380100, 7403380101, 47.11), (7403380100, 7403380101, 142.62199999999999), (7403380100, 1511544620, 61.469)]
 #edge_list = [(1,0,1), (0,2,1), (2,1,1), (0,3,1), (3,4,1), (3,2,1), (3,1,1), (2,4,1), (3,4,2), (1,5,2), (5,3,1)]
-#edge_list = [(0,1,1), (1,2,1), (2,0,1)]
+edge_list = [(0,1,1), (1,2,2), (2,0,3)]
 #edge_list = [(0,1,1), (0,2,1), (1,2,1), (2,3,1)]
+
 ###############################################################
 #                       SUPPORT FUNCTIONS                     #
 ###############################################################
@@ -291,13 +292,10 @@ def Hierholzer_algo(adj, edge_list, list_node):
             current_path.append(next_v)
         else:
             circuit.append(current_path.pop())
-    #circuitx = circuit.copy()
-    #circuitx.reverse()
     for i in range(len(circuit) - 1, -1, -1): 
         print(circuit[i], end = "") 
         if i: 
             print(" -> ", end = "")
-    #return circuitx
             
 def Hierholzer(edge_list, list_node):
     adj = get_adj_list(edge_list, list_node)
@@ -395,7 +393,7 @@ def is_strongly_connected(num_vertices, list_node, edge_list):
         if node == False:
             return False
     return True
-        
+
 ###############################################################
 #                             MAIN                            #
 ###############################################################
@@ -410,11 +408,11 @@ def solve_undirected(num_vertices, edge_list):
         new_edge_list = create_new_edge_list(list_odd_nodes, node)
         fleury_edge_list = tmp + new_edge_list
         Fleury(odd_copy[0], fleury_edge_list, node)
-        print("kj")
+        
     else:
         tmp = reverse_edge(edge_list)
         fleury_edge_list = edge_list + tmp
-        Fleury(node[0], fleury_edge_list, node)     
+        Fleury(node[0], fleury_edge_list, node)
         
 def solve_directed(num_vertices, edge_list):
     if is_eulerian(num_vertices, edge_list) == True:    
@@ -428,3 +426,7 @@ def solve(is_oriented, num_vertices, edge_list):
         solve_directed(num_vertices, edge_list)
     
 solve(False, 7, edge_list)
+    
+    
+    
+    
